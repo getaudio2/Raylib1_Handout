@@ -54,7 +54,10 @@ int main(void)
 
     // Main game loop
     static double x= 120, y = 35;
-    static double speed_x = 2, speed_y = 2;
+    static double speed_x = 5, speed_y = 5;
+    const float gravity = 0.5f;
+    static bool isGrounded = false;
+    static int enemyLife = 3;
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -66,13 +69,25 @@ int main(void)
         if (IsKeyDown(KEY_DOWN)) y += speed_y;
         if (IsKeyDown(KEY_UP)) y -= speed_y;
 
-        if (y > screenHeight) y = screenHeight;
+        if (y > 350){
+            y = 350;
+            speed_y = 0.0f;
+            isGrounded = true;
+        }
+        else if (y < 350) {
+            isGrounded = false;
+        }
         if (y < 0) y = 0;
         if (x > screenWidth) x = screenWidth;
         if (x < 0) x = 0;
 
-        if (IsKeyPressed(KEY_SPACE))
+        if (IsKeyPressed(KEY_SPACE) && isGrounded == true) {
+            speed_y -= 10.0f;
             PlaySound(soundArray[0]);
+        }
+
+        speed_y += gravity; // Aplica gravedad
+        y += speed_y;
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -84,7 +99,34 @@ int main(void)
         DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
 
        
-        DrawCircle(x, y, 35, DARKBLUE);
+        //DrawCircle(x, y, 35, DARKBLUE);
+        Rectangle rec1;
+        Rectangle rec2;
+        rec1.x = x + 20;
+        rec2.x = 600;
+        rec1.y = y + 20;
+        rec2.y = 300;
+        rec1.width = 50;
+        rec2.width = 80;
+        rec1.height = 70;
+        rec2.height = 130;
+
+        DrawRectangleRec(rec1, RED);
+        DrawRectangleRec(rec2, GREEN);
+        //DrawText("Enemy HP: " + enemyLife, 0, 0, 20, RED);
+
+        if (IsKeyPressed(KEY_D)) {
+            Rectangle rec3;
+            rec3.x = x + 60;
+            rec3.y = y + 40;
+            rec3.width = 70;
+            rec3.height = 10;
+            DrawRectangleRec(rec3, BLUE);
+            if (CheckCollisionRecs(rec3, rec2)) {
+                DrawText("Collision!!", 0, 0, 20, RED);
+                enemyLife -= 1;
+            }
+        }
 
         EndDrawing();
         //----------------------------------------------------------------------------------
